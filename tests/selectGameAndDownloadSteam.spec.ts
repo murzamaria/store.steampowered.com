@@ -33,7 +33,7 @@ test('Select most discounted game and verify Steam download', async ({ page, con
     } else {
       await page.mouse.wheel(0, 3000);
     }
-    await categoryPage.newAndTrendingTabLocator.click({});
+    await categoryPage.newAndTrendingTabLocator.click();
     await page.waitForTimeout(5000);
   });
 
