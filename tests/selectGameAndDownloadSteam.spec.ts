@@ -10,7 +10,7 @@ import { InstallSteamPage } from '../pages/installSteamPage';
 import path from 'path';
 import fs from 'fs';
 
-test('Select most discounted game and verify Steam download', async ({ page, context }) => {
+test('Download most discounted Steam game', async ({ page, context, baseURL }) => {
   const mainPage = new MainPage(page);
   const categoryPage = new CategoryPage(page);
   const gameCard = new GameCard(page);
@@ -22,26 +22,25 @@ test('Select most discounted game and verify Steam download', async ({ page, con
 
   await test.step('Open category', async () => {
     await mainPage.goToMenuCategory('Action');
-    await expect(page).toHaveURL(`${mainPage.baseUrl}/category/action/`, { timeout: 20000 });
+    await expect(page).toHaveURL(`${baseURL}/category/action/`, { timeout: 20000 });
   });
   await test.step('Open New & Trending tab', async () => {
     await page.waitForLoadState('networkidle');
-    if (test.info().project.name === 'firefox') {
-      await page.evaluate(() => {
-        window.scrollBy(0, 4000);
-      });
-    } else {
-      await page.mouse.wheel(0, 3000);
-    }
+    await page.mouse.wheel(0, 3000);
     await categoryPage.newAndTrendingTabLocator.click();
-    await page.waitForTimeout(5000);
   });
 
-  let discount: number;
-  let price: number;
+  await test.step('Make sure all game cards loaded', async () => {
+    await expect(gameCard.gameCardLocator.first()).toBeVisible({ timeout: 10000 });
+    await page.mouse.wheel(0, 1000);
+    await expect(gameCard.gameCardLocator.nth(11)).toBeVisible();
+  });
+
+  let discount;
+  let price;
   let titleLocator;
   let card;
-  let newPage: Page; //страница с игрой открывается в новой вкладке браузера
+  let newPage: Page;
 
   await test.step('Find the max discount', async () => {
     const discountElements = await gameCard.discountLocator.all();
@@ -49,11 +48,11 @@ test('Select most discounted game and verify Steam download', async ({ page, con
   });
 
   await test.step('Game selection logic', async () => {
-    if (discount != 0) {
+    if (discount != null) {
       await test.step('Get the game title locator with max discount & Save its price', async () => {
-        titleLocator = await gameCard.returnTitleLocatorByDiscount(discount);
-        card = await gameCard.returnGameCardLocator(titleLocator);
-        price = await gameCard.getPriceByGameCard(card);
+        card = await gameCard.getGameCard(discount);
+        titleLocator = await gameCard.getTitle(card);
+        price = await gameCard.getPrice(card).textContent();
       });
 
       await test.step('Go to the game page', async () => {
@@ -64,8 +63,10 @@ test('Select most discounted game and verify Steam download', async ({ page, con
       await test.step('Find the max price & Get the game title locator', async () => {
         const pricesElements = await gameCard.priceLocator.all();
         price = await getMaxValue(pricesElements);
-        titleLocator = await gameCard.returnTitleLocatorByPrice(price);
+        card = await gameCard.getGameCard(price);
+        titleLocator = await gameCard.getTitle(card);
       });
+
       await test.step('Go to the game page', async () => {
         [newPage] = await Promise.all([context.waitForEvent('page'), titleLocator.click()]);
         await newPage.waitForLoadState('domcontentloaded');
@@ -74,7 +75,7 @@ test('Select most discounted game and verify Steam download', async ({ page, con
   });
 
   await test.step('Process the age check if it appeared', async () => {
-    const url = page.url();
+    const url = newPage.url();
     if (url.includes('agecheck')) {
       await ageCheckPage.dayBox.selectOption('1');
       await ageCheckPage.monthBox.selectOption('12');
@@ -87,11 +88,11 @@ test('Select most discounted game and verify Steam download', async ({ page, con
   const gamePage = new GamePage(newPage!);
 
   await test.step('Check the price and discount of the selected game', async () => {
-    if (discount != 0) {
-      await expect(gamePage.gameDiscount).toContainText(`-${discount}%`);
-      await expect(gamePage.gameFinalPrice).toContainText(`$${price}`);
+    if (discount != null) {
+      await expect(gamePage.gameDiscount).toContainText(discount);
+      await expect(gamePage.gameFinalPrice).toContainText(price);
     } else {
-      await expect(gamePage.gamePrice).toHaveText(`$${price}`);
+      await expect(gamePage.gamePrice).toHaveText(price);
     }
   });
 
@@ -99,7 +100,7 @@ test('Select most discounted game and verify Steam download', async ({ page, con
   const installSteamPage = new InstallSteamPage(newPage!);
 
   await test.step('Open Install Steam page & Start download', async () => {
-    await gamePage.installSteamButton.click({ timeout: 5000 });
+    await gamePage.installSteamButton.click();
     const downloadPromise = newPage.waitForEvent('download');
     await installSteamPage.installButton.click();
     download = await downloadPromise;

@@ -7,12 +7,11 @@ export class MainPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.baseUrl = process.env.BASE_URL!;
     this.menuCategories = page.getByRole('link', { name: 'Categories' });
   }
 
   async goTo(path: string = '/') {
-    await this.page.goto(`${this.baseUrl}${path}`, {
+    await this.page.goto(path, {
       waitUntil: 'domcontentloaded',
       timeout: 60000,
     });

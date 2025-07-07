@@ -12,6 +12,7 @@ export default defineConfig({
   fullyParallel: true,
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {
+    baseURL: process.env.BASE_URL,
     headless: true,
     trace: 'retain-on-failure',
     video: 'retain-on-failure',
