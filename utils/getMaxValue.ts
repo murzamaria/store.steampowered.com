@@ -1,10 +1,10 @@
-import { Locator } from '@playwright/test';
+import { expect, Locator } from '@playwright/test';
 
 export async function getMaxValue(array: Locator[]) {
   let max = 0;
   let maxText: string | null = null;
   for (const el of array) {
-    await el.scrollIntoViewIfNeeded();
+    await expect(el).toBeVisible();
     const text = await el.textContent();
     const num = text!.replace(/[^\d.]/g, '');
     if (num) {
