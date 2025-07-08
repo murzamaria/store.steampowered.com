@@ -31,15 +31,13 @@ test('Download most discounted Steam game', async ({ page, context, baseURL }) =
   });
 
   await test.step('Make sure all game cards loaded', async () => {
-    await expect(gameCard.gameCardLocator.first()).toBeVisible({ timeout: 10000 });
     await page.mouse.wheel(0, 1000);
-    await expect(gameCard.gameCardLocator.nth(11)).toBeVisible();
+    await expect(gameCard.gameCardLocator).toHaveCount(12);
   });
 
   let discount;
   let price;
   let titleLocator;
-  let card;
   let newPage: Page;
 
   await test.step('Find the max discount', async () => {
@@ -50,30 +48,23 @@ test('Download most discounted Steam game', async ({ page, context, baseURL }) =
   await test.step('Game selection logic', async () => {
     if (discount != null) {
       await test.step('Get the game title locator with max discount & Save its price', async () => {
-        card = await gameCard.getGameCard(discount);
-        titleLocator = await gameCard.getTitle(card);
-        price = await gameCard.getPrice(card).textContent();
-      });
-
-      await test.step('Go to the game page', async () => {
-        [newPage] = await Promise.all([context.waitForEvent('page'), titleLocator.click()]);
-        await newPage.waitForLoadState('domcontentloaded');
+        const card = new GameCard(page, await gameCard.getGameCard(discount));
+        titleLocator = await card.nthTitle;
+        price = await card.nthPrice.textContent();
       });
     } else {
       await test.step('Find the max price & Get the game title locator', async () => {
         const pricesElements = await gameCard.priceLocator.all();
         price = await getMaxValue(pricesElements);
-        card = await gameCard.getGameCard(price);
-        titleLocator = await gameCard.getTitle(card);
-      });
-
-      await test.step('Go to the game page', async () => {
-        [newPage] = await Promise.all([context.waitForEvent('page'), titleLocator.click()]);
-        await newPage.waitForLoadState('domcontentloaded');
+        const card = new GameCard(page, await gameCard.getGameCard(price));
+        titleLocator = await card.nthTitle;
       });
     }
   });
-
+  await test.step('Go to the game page', async () => {
+    [newPage] = await Promise.all([context.waitForEvent('page'), titleLocator.click()]);
+    await newPage.waitForLoadState('domcontentloaded');
+  });
   await test.step('Process the age check if it appeared', async () => {
     const url = newPage.url();
     if (url.includes('agecheck')) {

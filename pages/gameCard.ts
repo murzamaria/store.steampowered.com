@@ -5,24 +5,24 @@ export class GameCard {
   readonly gameCardLocator: Locator;
   readonly discountLocator: Locator;
   readonly priceLocator: Locator;
+  readonly nthPrice: Locator;
+  readonly nthTitle: Locator;
 
-  constructor(page: Page) {
+  constructor(page: Page, nthCard?: Locator) {
     this.page = page;
     this.gameCardLocator = page.locator('.gASJ2lL_xmVNuZkWGvrWg');
     this.discountLocator = this.gameCardLocator.locator('.cnkoFkzVCby40gJ0jGGS4');
     this.priceLocator = this.gameCardLocator
       .locator('._3j4dI1yA7cRfCvK8h406OB')
       .filter({ hasText: '$' });
+
+    if (nthCard) {
+      this.nthPrice = nthCard.locator('._3j4dI1yA7cRfCvK8h406OB').filter({ hasText: '$' });
+      this.nthTitle = nthCard.locator('.StoreSaleWidgetTitle');
+    }
   }
 
   getGameCard(textContent: string) {
     return this.gameCardLocator.filter({ hasText: textContent }).first();
-  }
-
-  getTitle(card: Locator) {
-    return card.locator('.StoreSaleWidgetTitle');
-  }
-  getPrice(card: Locator) {
-    return card.locator('._3j4dI1yA7cRfCvK8h406OB').filter({ hasText: '$' });
   }
 }

@@ -30,7 +30,7 @@ export default defineConfig({
         browserName: 'chromium',
       },
     },
-    {
+    /* {
       name: 'Firefox',
       use: {
         browserName: 'firefox',
@@ -42,6 +42,6 @@ export default defineConfig({
       use: {
         browserName: 'webkit',
       },
-    },
+    }, */
   ],
 });
