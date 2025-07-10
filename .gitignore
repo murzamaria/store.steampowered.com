@@ -3,3 +3,8 @@
 /test-results
 /playwright-report
 /downloads
+
+# Playwright
+node_modules/
+/blob-report/
+/playwright/.cache/
