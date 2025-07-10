@@ -30,12 +30,12 @@ export default defineConfig({
         browserName: 'chromium',
       },
     },
-    /*  {
+    {
       name: 'Firefox',
       use: {
         browserName: 'firefox',
       },
-    }, */
+    },
     {
       name: 'WebKit',
       timeout: 90 * 1000,

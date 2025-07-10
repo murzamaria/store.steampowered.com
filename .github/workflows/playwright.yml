@@ -4,16 +4,25 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
-
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Choose the branch: main on default'
+        required: false
+        default: 'main'
+      browser:
+        description: 'Choose the browser: chromium on default'
+        required: false
+        default: 'chromium'
 jobs:
-  tests:
-    strategy:
-      matrix:
-        browser: [chrome, firefox, webkit]
+  auto-tests:
+    if: github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-latest
     container:
       image: mcr.microsoft.com/playwright:v1.44.0-jammy
-
+    strategy:
+      matrix:
+        browser: [chromium, firefox, webkit]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -43,4 +52,42 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: downloaded-file-${{ matrix.browser }}
-          path: downloads/
+          path: downloads
+
+  manual-tests:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.44.0-jammy
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Playwright tests
+        run: npx playwright test --project=${{ github.event.inputs.browser }} || true
+
+      - name: Upload HTML Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: html-report-${{ github.event.inputs.browser }}
+          path: playwright-report
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs-${{ github.event.inputs.browser }}
+          path: logs/test.log
+
+      - name: Upload downloaded file
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: downloaded-file-${{ github.event.inputs.browser }}
+          path: downloads
