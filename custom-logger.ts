@@ -6,7 +6,12 @@ export class CustomLogger implements Logger {
   private logFilePath: string;
 
   constructor() {
-    this.logFilePath = path.join('logs', 'test.log');
+    const logDir = path.join(process.cwd(), 'logs');
+    if (!fs.existsSync(logDir)) {
+      fs.mkdirSync(logDir, { recursive: true });
+    }
+
+    this.logFilePath = path.join(logDir, 'test.log');
 
     fs.writeFileSync(this.logFilePath, 'Tests started\n', { flag: 'w' });
   }
