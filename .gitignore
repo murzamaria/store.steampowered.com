@@ -1,8 +1,8 @@
 .env
-/node_modules
 /test-results
 /playwright-report
 /downloads
+/logs/
 
 # Playwright
 node_modules/
