@@ -44,4 +44,5 @@ export default defineConfig({
       },
     },
   ],
+  globalSetup: require.resolve('./global-setup'),
 });
