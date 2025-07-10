@@ -10,7 +10,7 @@ export default defineConfig({
     timeout: 5000,
   },
   fullyParallel: true,
-  reporter: [['list'], ['html', { open: 'never' }]],
+  reporter: [['list'], ['html', { outputFolder: 'playwright-report', open: 'never' }]],
   use: {
     baseURL: process.env.BASE_URL,
     headless: true,
