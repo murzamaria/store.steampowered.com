@@ -1,6 +1,5 @@
 import { defineConfig } from '@playwright/test';
 import { CustomLogger } from './custom-logger';
-import globalSetup from './global-setup';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -45,5 +44,4 @@ export default defineConfig({
       },
     },
   ],
-  globalSetup: require.resolve('./global-setup'),
 });
