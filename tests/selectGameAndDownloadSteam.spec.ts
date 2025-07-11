@@ -104,6 +104,15 @@ test('Download most discounted Steam game', async ({ page, context, baseURL }) =
 
   let suggestedName;
   let savePath;
+
+  await test.step('Ensure downloads directory exists', async () => {
+    const downloadsDir = path.join(process.cwd(), 'downloads');
+    if (!fs.existsSync(downloadsDir)) {
+      fs.mkdirSync(downloadsDir, { recursive: true });
+      console.log(`Created directory: ${downloadsDir}`);
+    }
+  });
+
   await test.step('Save the file & Check existing', async () => {
     suggestedName = download.suggestedFilename();
     savePath = path.join(process.cwd(), 'downloads', suggestedName);
