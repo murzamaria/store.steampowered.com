@@ -14,6 +14,10 @@ on:
         description: 'Choose the browser: chromium on default'
         required: false
         default: 'chromium'
+
+env:
+  BASE_URL: ${{ secrets.BASE_URL }}
+
 jobs:
   auto-tests:
     if: github.event_name != 'workflow_dispatch'
