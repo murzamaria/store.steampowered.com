@@ -7,6 +7,7 @@ import { AgeCheckPage } from '../pages/ageCheckPage';
 import { getMaxValue } from '../utils/getMaxValue';
 import { timeStamp } from '../utils/timeStamp';
 import { InstallSteamPage } from '../pages/installSteamPage';
+import { scrollToElementWithKeyboard } from '../utils/scrollToElementWithKeybord';
 import path from 'path';
 import fs from 'fs';
 
@@ -25,8 +26,8 @@ test('Download most discounted Steam game', async ({ page, context, baseURL }) =
     await expect(page).toHaveURL(`${baseURL}/category/action/`, { timeout: 20000 });
   });
   await test.step('Open New & Trending tab', async () => {
-    await page.waitForLoadState('networkidle');
-    await page.mouse.wheel(0, 3000);
+    await page.waitForLoadState('domcontentloaded');
+    await scrollToElementWithKeyboard(page, categoryPage.newAndTrendingTabLocator);
     await categoryPage.newAndTrendingTabLocator.click();
   });
 
@@ -73,6 +74,7 @@ test('Download most discounted Steam game', async ({ page, context, baseURL }) =
   await test.step('Process the age check if it appeared', async () => {
     const url = newPage.url();
     if (url.includes('agecheck')) {
+      await expect(ageCheckPage.dayBox).toBeVisible({ timeout: 10000 });
       await ageCheckPage.dayBox.selectOption('1');
       await ageCheckPage.monthBox.selectOption('12');
       await ageCheckPage.yearBox.selectOption('2000');
