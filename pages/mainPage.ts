@@ -13,7 +13,6 @@ export class MainPage {
   async goTo(path: string = '/') {
     await this.page.goto(path, {
       waitUntil: 'domcontentloaded',
-      timeout: 60000,
     });
   }
 
