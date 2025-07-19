@@ -4,7 +4,7 @@ export async function scrollToElementWithKeyboard(
   page: Page,
   locator: Locator,
   key: 'PageDown' | 'ArrowDown' = 'PageDown',
-  maxScrolls = 10,
+  maxScrolls = 15,
   timeout = 300,
 ) {
   for (let i = 0; i < maxScrolls; i++) {
